@@ -18,18 +18,18 @@ const formatDuration = (startDate, endDate) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
   const durationMinutes = Math.round((end - start) / 60000);
-
+  
   if (durationMinutes < 60) {
     return `${durationMinutes}M`;
   }
-
+  
   const hours = Math.floor(durationMinutes / 60);
   const minutes = durationMinutes % 60;
-
+  
   if (hours < 24) {
     return `${String(hours).padStart(2, '0')}H ${String(minutes).padStart(2, '0')}M`;
   }
-
+  
   const days = Math.floor(hours / 24);
   const remainingHours = hours % 24;
   return `${String(days).padStart(2, '0')}D ${String(remainingHours).padStart(2, '0')}H ${String(minutes).padStart(2, '0')}M`;
@@ -37,21 +37,21 @@ const formatDuration = (startDate, endDate) => {
 
 const createPointTemplate = (point) => {
   const { type, destination, startDate, endDate, price, offers, isFavorite } = point;
-
+  
   const date = formatDate(startDate);
   const startTime = formatTime(startDate);
   const endTime = formatTime(endDate);
   const duration = formatDuration(startDate, endDate);
-
+  
   const favoriteClass = isFavorite ? 'event__favorite-btn--active' : '';
-
-  const offersHtml = offers.length > 0
+  
+  const offersHtml = offers.length > 0 
     ? `<h4 class="visually-hidden">Offers:</h4>
        <ul class="event__selected-offers">
-         ${offers.map((offer) => `<li class="event__offer">${offer.title}</li>`).join('')}
+         ${offers.map(offer => `<li class="event__offer">${offer.title}</li>`).join('')}
        </ul>`
     : '';
-
+  
   return (
     `<li class="trip-events__item">
       <div class="event">
@@ -89,13 +89,16 @@ const createPointTemplate = (point) => {
 export default class PointView extends AbstractView {
   #point = null;
   #rollupClickHandler = null;
+  #favoriteClickHandler = null;
 
-  constructor({ point, onRollupClick }) {
+  constructor({ point, onRollupClick, onFavoriteClick }) {
     super();
     this.#point = point;
     this.#rollupClickHandler = onRollupClick;
+    this.#favoriteClickHandler = onFavoriteClick;
 
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupClickHandler);
+    this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#favoriteClickHandler);
   }
 
   get template() {

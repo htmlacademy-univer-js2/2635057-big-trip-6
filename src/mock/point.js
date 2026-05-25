@@ -24,7 +24,7 @@ export const generatePoint = () => {
   const destination = getRandomItem(DESTINATIONS);
   const offersForType = OFFERS.find((offer) => offer.type === type)?.offers || [];
   const selectedOffers = offersForType.filter(() => Math.random() > 0.5);
-  
+
   const startDate = getRandomDate('2025-03-10', '2025-03-20');
   const duration = getRandomInt(30, 180); // minutes
   const endDate = new Date(startDate.getTime() + duration * 60000);
@@ -42,8 +42,6 @@ export const generatePoint = () => {
   };
 };
 
-export const generatePoints = (count) => {
-  return Array.from({ length: count }, generatePoint).sort((a, b) => 
-    new Date(a.startDate) - new Date(b.startDate)
-  );
-};
+export const generatePoints = (count) => Array.from({ length: count }, generatePoint).sort((a, b) =>
+  new Date(a.startDate) - new Date(b.startDate)
+);

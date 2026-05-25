@@ -2,32 +2,83 @@ import FiltersView from './view/filters-view.js';
 import SortView from './view/sort-view.js';
 import PointView from './view/point-view.js';
 import EditFormView from './view/edit-form-view.js';
-import { render } from './render.js';
+import { render, replace } from './render.js';
 
 export default class Presenter {
-  constructor() {
-    this.filtersContainer = document.querySelector('.trip-controls__filters');
-    this.sortContainer = document.querySelector('.trip-events');
-    this.eventsList = document.querySelector('.trip-events__list');
+  #model = null;
+  #filtersContainer = document.querySelector('.trip-controls__filters');
+  #sortContainer = document.querySelector('.trip-events');
+  #eventsList = document.querySelector('.trip-events__list');
+
+  #pointComponents = [];
+
+  constructor(model) {
+    this.#model = model;
   }
 
-  init() {
-    // Отрисовка фильтров
-    const filtersComponent = new FiltersView();
-    render(filtersComponent, this.filtersContainer);
-
-    // Отрисовка сортировки
-    const sortComponent = new SortView();
-    render(sortComponent, this.sortContainer);
-
-    // Отрисовка формы редактирования (первой в списке)
-    const editFormComponent = new EditFormView();
-    render(editFormComponent, this.eventsList);
-
-    // Отрисовка 3 точек маршрута
-    for (let i = 0; i < 3; i++) {
-      const pointComponent = new PointView();
-      render(pointComponent, this.eventsList);
+  #handleEscKeyDown = (evt) => {
+    if (evt.key !== 'Escape') {
+      return;
     }
+
+    const openedPair = this.#pointComponents.find(({ isEditing }) => isEditing);
+
+    if (!openedPair) {
+      return;
+    }
+
+    this.#replaceFormToPoint(openedPair);
+  };
+
+  #replacePointToForm = (pair) => {
+    replace(pair.editFormComponent, pair.pointComponent);
+    pair.isEditing = true;
+  };
+
+  #replaceFormToPoint = (pair) => {
+    replace(pair.pointComponent, pair.editFormComponent);
+    pair.isEditing = false;
+  };
+
+  init() {
+    const filtersComponent = new FiltersView();
+    render(filtersComponent, this.#filtersContainer);
+
+    const sortComponent = new SortView();
+    render(sortComponent, this.#sortContainer);
+
+    const points = this.#model.getPoints();
+
+    this.#pointComponents = points.map((point) => {
+      const pair = { isEditing: false };
+
+      const pointComponent = new PointView({
+        point,
+        onRollupClick: (evt) => {
+          evt.preventDefault();
+          this.#replacePointToForm(pair);
+        }
+      });
+
+      const editFormComponent = new EditFormView({
+        onFormSubmit: (evt) => {
+          evt.preventDefault();
+          this.#replaceFormToPoint(pair);
+        },
+        onRollupClick: (evt) => {
+          evt.preventDefault();
+          this.#replaceFormToPoint(pair);
+        }
+      });
+
+      pair.pointComponent = pointComponent;
+      pair.editFormComponent = editFormComponent;
+
+      return pair;
+    });
+
+    this.#pointComponents.forEach(({ pointComponent }) => render(pointComponent, this.#eventsList));
+
+    window.addEventListener('keydown', this.#handleEscKeyDown);
   }
 }

@@ -12,8 +12,32 @@ function createElement(template) {
   return newElement.firstElementChild;
 }
 
-function render(component, container, place = RenderPosition.BEFOREEND) {
-  container.insertAdjacentElement(place, component.getElement());
+class AbstractView {
+  #element = null;
+
+  get template() {
+    throw new Error('Abstract method not implemented: template');
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
 }
 
-export {RenderPosition, createElement, render};
+function render(component, container, place = RenderPosition.BEFOREEND) {
+  container.insertAdjacentElement(place, component.element);
+}
+
+function replace(newComponent, oldComponent) {
+  oldComponent.element.replaceWith(newComponent.element);
+}
+
+export {RenderPosition, AbstractView, render, replace};

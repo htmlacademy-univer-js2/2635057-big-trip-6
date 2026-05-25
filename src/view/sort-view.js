@@ -8,6 +8,7 @@ const createSortItemTemplate = ({ value, name, isChecked, isDisabled }) => (
       type="radio"
       name="trip-sort"
       value="${value}"
+      data-sort-type="${value}"
       ${isChecked ? 'checked' : ''}
       ${isDisabled ? 'disabled' : ''}
     >
@@ -23,10 +24,14 @@ const createSortTemplate = (sortItems) => (
 
 export default class SortView extends AbstractView {
   #sortItems = [];
+  #sortTypeChangeHandler = null;
 
-  constructor({ sortItems }) {
+  constructor({ sortItems, onSortTypeChange }) {
     super();
     this.#sortItems = sortItems;
+    this.#sortTypeChangeHandler = onSortTypeChange;
+
+    this.element.addEventListener('change', this.#sortTypeChangeHandler);
   }
 
   get template() {

@@ -2,7 +2,7 @@ const RenderPosition = {
   BEFOREBEGIN: 'beforebegin',
   AFTERBEGIN: 'afterbegin',
   BEFOREEND: 'beforeend',
-  AFTEREND: 'afterend',
+  AFTEREND: 'afterend'
 };
 
 function createElement(template) {
@@ -32,6 +32,32 @@ class AbstractView {
   }
 }
 
+class AbstractStatefulView extends AbstractView {
+  _state = null;
+
+  get state() {
+    return this._state;
+  }
+
+  _setState(partialState) {
+    this._state = { ...this._state, ...partialState };
+  }
+
+  updateElement(partialState) {
+    this._setState(partialState);
+    const prevElement = this.element;
+    const parent = prevElement.parentElement;
+    this.removeElement();
+    const newElement = this.element;
+    parent.replaceChild(newElement, prevElement);
+    this._restoreHandlers();
+  }
+
+  _restoreHandlers() {
+    throw new Error('Abstract method not implemented: restoreHandlers');
+  }
+}
+
 function render(component, container, place = RenderPosition.BEFOREEND) {
   container.insertAdjacentElement(place, component.element);
 }
@@ -40,4 +66,4 @@ function replace(newComponent, oldComponent) {
   oldComponent.element.replaceWith(newComponent.element);
 }
 
-export {RenderPosition, AbstractView, render, replace};
+export { RenderPosition, AbstractView, AbstractStatefulView, render, replace };

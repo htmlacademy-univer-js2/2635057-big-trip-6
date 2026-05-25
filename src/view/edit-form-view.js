@@ -1,5 +1,12 @@
+import dayjs from 'dayjs';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 import { OFFERS, TYPES } from '../const.js';
 import { AbstractStatefulView } from '../render.js';
+
+const DATE_FORMAT = 'DD/MM/YY HH:mm';
+
+const formatDateForInput = (date) => dayjs(date).format(DATE_FORMAT);
 
 const createDestinationOptionsTemplate = (destinations) => destinations
   .map((destination) => `<option value="${destination.name}"></option>`)
@@ -94,10 +101,10 @@ const createEditFormTemplate = ({ point, destinations }) => {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-${point.id}">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-${point.id}" type="text" name="event-start-time" value="${point.startDate}">
+          <input class="event__input  event__input--time" id="event-start-time-${point.id}" type="text" name="event-start-time" value="${formatDateForInput(point.startDate)}">
           &mdash;
           <label class="visually-hidden" for="event-end-time-${point.id}">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-${point.id}" type="text" name="event-end-time" value="${point.endDate}">
+          <input class="event__input  event__input--time" id="event-end-time-${point.id}" type="text" name="event-end-time" value="${formatDateForInput(point.endDate)}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -124,6 +131,8 @@ export default class EditFormView extends AbstractStatefulView {
   #destinations = [];
   #formSubmitHandler = null;
   #rollupClickHandler = null;
+  #datepickerFrom = null;
+  #datepickerTo = null;
 
   constructor({ point, destinations, onFormSubmit, onRollupClick }) {
     super();
@@ -133,6 +142,7 @@ export default class EditFormView extends AbstractStatefulView {
     this.#rollupClickHandler = onRollupClick;
 
     this._setInnerHandlers();
+    this.#setDatepickers();
   }
 
   get template() {
@@ -141,6 +151,7 @@ export default class EditFormView extends AbstractStatefulView {
 
   _restoreHandlers() {
     this._setInnerHandlers();
+    this.#setDatepickers();
   }
 
   _setInnerHandlers() {
@@ -149,6 +160,42 @@ export default class EditFormView extends AbstractStatefulView {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
   }
+
+  #setDatepickers() {
+    this.#datepickerFrom = flatpickr(
+      this.element.querySelector(`#event-start-time-${this._state.id}`),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        'time_24hr': true,
+        defaultDate: this._state.startDate,
+        onChange: this.#dateFromChangeHandler
+      }
+    );
+
+    this.#datepickerTo = flatpickr(
+      this.element.querySelector(`#event-end-time-${this._state.id}`),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        'time_24hr': true,
+        defaultDate: this._state.endDate,
+        minDate: this._state.startDate,
+        onChange: this.#dateToChangeHandler
+      }
+    );
+  }
+
+  #dateFromChangeHandler = ([userDate]) => {
+    this._setState({ startDate: userDate.toISOString() });
+    if (this.#datepickerTo) {
+      this.#datepickerTo.set('minDate', userDate);
+    }
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    this._setState({ endDate: userDate.toISOString() });
+  };
 
   #typeChangeHandler = (evt) => {
     this.updateElement({

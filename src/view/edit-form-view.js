@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import { AbstractView } from '../render.js';
 
 const createEditFormTemplate = () => (
   `<li class="trip-events__item">
@@ -52,19 +52,20 @@ const createEditFormTemplate = () => (
   </li>`
 );
 
-export default class EditFormView {
-  getTemplate() {
+export default class EditFormView extends AbstractView {
+  #formSubmitHandler = null;
+  #rollupClickHandler = null;
+
+  constructor({ onFormSubmit, onRollupClick }) {
+    super();
+    this.#formSubmitHandler = onFormSubmit;
+    this.#rollupClickHandler = onRollupClick;
+
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupClickHandler);
+  }
+
+  get template() {
     return createEditFormTemplate();
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
     }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
 }

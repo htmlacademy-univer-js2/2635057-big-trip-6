@@ -1,10 +1,8 @@
-import { DESTINATIONS } from './const.js';
 import FiltersView from './view/filters-view.js';
 import SortView from './view/sort-view.js';
-import PointView from './view/point-view.js';
-import EditFormView from './view/edit-form-view.js';
 import NoPointsView from './view/no-points-view.js';
-import { render, replace } from './render.js';
+import PointPresenter from './presenter/point-presenter.js';
+import { render } from './render.js';
 
 const EMPTY_LIST_MESSAGE = 'Click New Event to create your first point';
 
@@ -35,34 +33,21 @@ export default class Presenter {
   #filtersContainer = document.querySelector('.trip-controls__filters');
   #sortContainer = document.querySelector('.trip-events');
   #eventsList = document.querySelector('.trip-events__list');
-  #pointComponents = [];
+  #pointPresenters = new Map();
 
   constructor(model) {
     this.#model = model;
   }
 
-  #handleEscKeyDown = (evt) => {
-    if (evt.key !== 'Escape') {
-      return;
-    }
+  #handlePointChange = (updatedPoint) => {
+    this.#model.updatePoint(updatedPoint);
 
-    const openedPair = this.#pointComponents.find(({ isEditing }) => isEditing);
-
-    if (!openedPair) {
-      return;
-    }
-
-    this.#replaceFormToPoint(openedPair);
+    const pointPresenter = this.#pointPresenters.get(updatedPoint.id);
+    pointPresenter.init(updatedPoint);
   };
 
-  #replacePointToForm = (pair) => {
-    replace(pair.editFormComponent, pair.pointComponent);
-    pair.isEditing = true;
-  };
-
-  #replaceFormToPoint = (pair) => {
-    replace(pair.pointComponent, pair.editFormComponent);
-    pair.isEditing = false;
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
   };
 
   init() {
@@ -80,38 +65,18 @@ export default class Presenter {
     const sortComponent = new SortView({ sortItems: createSortData() });
     render(sortComponent, this.#sortContainer);
 
-    this.#pointComponents = points.map((point) => {
-      const pair = { isEditing: false };
+    const destinations = this.#model.getDestinations();
 
-      const pointComponent = new PointView({
-        point,
-        onRollupClick: (evt) => {
-          evt.preventDefault();
-          this.#replacePointToForm(pair);
-        }
+    points.forEach((point) => {
+      const pointPresenter = new PointPresenter({
+        eventsListContainer: this.#eventsList,
+        destinations,
+        onDataChange: this.#handlePointChange,
+        onModeChange: this.#handleModeChange
       });
 
-      const editFormComponent = new EditFormView({
-        point,
-        destinations: DESTINATIONS,
-        onFormSubmit: (evt) => {
-          evt.preventDefault();
-          this.#replaceFormToPoint(pair);
-        },
-        onRollupClick: (evt) => {
-          evt.preventDefault();
-          this.#replaceFormToPoint(pair);
-        }
-      });
-
-      pair.pointComponent = pointComponent;
-      pair.editFormComponent = editFormComponent;
-
-      return pair;
+      pointPresenter.init(point);
+      this.#pointPresenters.set(point.id, pointPresenter);
     });
-
-    this.#pointComponents.forEach(({ pointComponent }) => render(pointComponent, this.#eventsList));
-
-    window.addEventListener('keydown', this.#handleEscKeyDown);
   }
 }

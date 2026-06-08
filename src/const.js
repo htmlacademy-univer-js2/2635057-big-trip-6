@@ -50,4 +50,4 @@ export const Message = {
 };
 
 export const AUTHORIZATION = 'Basic nana9bigTr1pK3y2026';
-export const END_POINT = 'https://21.objects.pages.academy/big-trip';
+export const END_POINT = 'https://24.objects.htmlacademy.pro/big-trip';

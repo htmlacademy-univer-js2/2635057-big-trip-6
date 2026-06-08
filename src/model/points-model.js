@@ -17,11 +17,11 @@ export default class PointsModel extends Observable {
   async init() {
     try {
       this.#points = await this.#pointsApiService.points;
+      this._notify(UpdateType.INIT, { isError: false });
     } catch (err) {
       this.#points = [];
+      this._notify(UpdateType.INIT, { isError: true });
     }
-
-    this._notify(UpdateType.INIT);
   }
 
   async updatePoint(updateType, update) {

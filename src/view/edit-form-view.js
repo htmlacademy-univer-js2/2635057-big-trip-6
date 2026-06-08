@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
+import he from 'he';
 import 'flatpickr/dist/flatpickr.min.css';
 import { TYPES } from '../const.js';
 import { AbstractStatefulView } from '../render.js';
@@ -10,7 +11,7 @@ const DATE_FORMAT = 'DD/MM/YY HH:mm';
 const formatDateForInput = (date) => date ? dayjs(date).format(DATE_FORMAT) : '';
 
 const createDestinationOptionsTemplate = (destinations) => destinations
-  .map((destination) => `<option value="${destination.name}"></option>`)
+  .map((destination) => `<option value="${he.encode(destination.name)}"></option>`)
   .join('');
 
 const createEventTypeItemTemplate = (type, currentType, pointId, isDisabled) => `<div class="event__type-item">
@@ -41,7 +42,7 @@ const createOffersTemplate = (point, offers) => {
           ${point.isDisabled ? 'disabled' : ''}
         >
         <label class="event__offer-label" for="event-offer-${offer.id}-${point.id}">
-          <span class="event__offer-title">${offer.title}</span>
+          <span class="event__offer-title">${he.encode(offer.title)}</span>
           +€&nbsp;<span class="event__offer-price">${offer.price}</span>
         </label>
       </div>`).join('')}
@@ -57,14 +58,14 @@ const createDestinationSectionTemplate = (destination) => {
   const photosMarkup = destination.pictures.length > 0
     ? `<div class="event__photos-container">
       <div class="event__photos-tape">
-        ${destination.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('')}
+        ${destination.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${he.encode(picture.description)}">`).join('')}
       </div>
     </div>`
     : '';
 
   return `<section class="event__section  event__section--destination">
     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-    <p class="event__destination-description">${destination.description || ''}</p>
+    <p class="event__destination-description">${he.encode(destination.description || '')}</p>
 
     ${photosMarkup}
   </section>`;
@@ -109,7 +110,7 @@ const createEditFormTemplate = ({ point, destinations, offers, isNewPoint }) => 
 
         <div class="event__field-group  event__field-group--destination">
           <label class="event__label  event__type-output" for="event-destination-${point.id}">${capitalize(point.type)}</label>
-          <input class="event__input  event__input--destination" id="event-destination-${point.id}" type="text" name="event-destination" value="${destinationName}" list="destination-list-${point.id}" ${disabledAttr}>
+          <input class="event__input  event__input--destination" id="event-destination-${point.id}" type="text" name="event-destination" value="${he.encode(destinationName)}" list="destination-list-${point.id}" ${disabledAttr}>
           <datalist id="destination-list-${point.id}">
             ${createDestinationOptionsTemplate(destinations)}
           </datalist>

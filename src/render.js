@@ -46,10 +46,6 @@ class AbstractView {
 class AbstractStatefulView extends AbstractView {
   _state = null;
 
-  get state() {
-    return this._state;
-  }
-
   _setState(partialState) {
     this._state = { ...this._state, ...partialState };
   }

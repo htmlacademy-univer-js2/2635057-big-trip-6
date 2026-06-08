@@ -5,7 +5,7 @@ import PointsListView from './view/points-list-view.js';
 import PointPresenter from './presenter/point-presenter.js';
 import NewPointPresenter from './presenter/new-point-presenter.js';
 import { render, remove } from './render.js';
-import { SortType, UserAction, UpdateType, FilterType, EmptyListMessage } from './const.js';
+import { SortType, UserAction, UpdateType, FilterType, EmptyListMessage, Message } from './const.js';
 import { filter, sortByDay, sortByTime, sortByPrice } from './utils.js';
 
 const createSortData = (currentSortType) => ([
@@ -34,6 +34,7 @@ export default class Presenter {
   #newPointPresenter = null;
   #currentSortType = SortType.DAY;
   #isLoading = true;
+  #isLoadingError = false;
 
   constructor({ pointsModel, destinationsModel, offersModel, filterModel }) {
     this.#pointsModel = pointsModel;
@@ -97,10 +98,8 @@ export default class Presenter {
     render(this.#sortComponent, this.#sortContainer);
   }
 
-  #renderNoPoints() {
-    this.#noPointsComponent = new NoPointsView({
-      message: EmptyListMessage[this.#filterModel.getFilter()]
-    });
+  #renderMessage(message) {
+    this.#noPointsComponent = new NoPointsView({ message });
     render(this.#noPointsComponent, this.#sortContainer);
   }
 
@@ -127,10 +126,15 @@ export default class Presenter {
       return;
     }
 
+    if (this.#isLoadingError) {
+      this.#renderMessage(Message.FAILED);
+      return;
+    }
+
     const points = this.points;
 
     if (points.length === 0) {
-      this.#renderNoPoints();
+      this.#renderMessage(EmptyListMessage[this.#filterModel.getFilter()]);
       return;
     }
 
@@ -201,8 +205,9 @@ export default class Presenter {
         break;
       case UpdateType.INIT:
         this.#isLoading = false;
+        this.#isLoadingError = data.isError;
         remove(this.#loadingComponent);
-        this.#newEventButton.disabled = false;
+        this.#newEventButton.disabled = data.isError;
         this.#renderBoard();
         break;
     }
@@ -235,7 +240,7 @@ export default class Presenter {
 
     if (this.points.length === 0) {
       remove(this.#pointsListComponent);
-      this.#renderNoPoints();
+      this.#renderMessage(EmptyListMessage[this.#filterModel.getFilter()]);
     }
   };
 }

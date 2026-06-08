@@ -1,19 +1,17 @@
 import EditFormView from '../view/edit-form-view.js';
 import { render, remove, RenderPosition } from '../render.js';
-import { UserAction, UpdateType, TYPES } from '../const.js';
+import { UserAction, UpdateType } from '../const.js';
 
-const createBlankPoint = () => {
-  const now = new Date().toISOString();
+const DEFAULT_TYPE = 'flight';
 
-  return {
-    type: TYPES[0],
-    destination: null,
-    dateFrom: now,
-    dateTo: now,
-    basePrice: 0,
-    offers: [],
-    isFavorite: false
-  };
+const BLANK_POINT = {
+  type: DEFAULT_TYPE,
+  destination: null,
+  dateFrom: null,
+  dateTo: null,
+  basePrice: 0,
+  offers: [],
+  isFavorite: false
 };
 
 export default class NewPointPresenter {
@@ -39,7 +37,7 @@ export default class NewPointPresenter {
     }
 
     this.#editFormComponent = new EditFormView({
-      point: createBlankPoint(),
+      point: { ...BLANK_POINT },
       destinations: this.#destinations,
       offers: this.#offers,
       isNewPoint: true,
@@ -71,15 +69,13 @@ export default class NewPointPresenter {
   }
 
   setAborting() {
-    const resetFormState = () => {
-      this.#editFormComponent.updateElement({
-        isDisabled: false,
-        isSaving: false,
-        isDeleting: false
-      });
-    };
+    this.#editFormComponent.updateElement({
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false
+    });
 
-    this.#editFormComponent.shake(resetFormState);
+    this.#editFormComponent.shake();
   }
 
   #handleFormSubmit = (point) => {

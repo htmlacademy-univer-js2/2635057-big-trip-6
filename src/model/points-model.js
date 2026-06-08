@@ -15,13 +15,13 @@ export default class PointsModel extends Observable {
   }
 
   async init() {
-    try {
-      this.#points = await this.#pointsApiService.points;
-      this._notify(UpdateType.INIT, { isError: false });
-    } catch (err) {
-      this.#points = [];
-      this._notify(UpdateType.INIT, { isError: true });
-    }
+    this.#points = await this.#pointsApiService.points;
+    this._notify(UpdateType.INIT, { isError: false });
+  }
+
+  setLoadFailed() {
+    this.#points = [];
+    this._notify(UpdateType.INIT, { isError: true });
   }
 
   async updatePoint(updateType, update) {

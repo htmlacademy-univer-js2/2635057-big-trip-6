@@ -34,8 +34,15 @@ export default class PointPresenter {
     const prevPointComponent = this.#pointComponent;
     const prevEditFormComponent = this.#editFormComponent;
 
+    const destination = this.#destinations.find((item) => item.id === point.destination);
+    const offerGroup = this.#offers.find((group) => group.type === point.type);
+    const typeOffers = offerGroup ? offerGroup.offers : [];
+    const selectedOffers = typeOffers.filter((offer) => point.offers.includes(offer.id));
+
     this.#pointComponent = new PointView({
       point: this.#point,
+      destination,
+      offers: selectedOffers,
       onRollupClick: this.#handleEditClick,
       onFavoriteClick: this.#handleFavoriteClick
     });
@@ -111,8 +118,8 @@ export default class PointPresenter {
   };
 
   #handleFormSubmit = (update) => {
+    // Форма скроется автоматически при перерисовке после успешного ответа сервера
     this.#onDataChange(UserAction.UPDATE_POINT, UpdateType.MINOR, update);
-    this.#replaceFormToPoint();
   };
 
   #handleDeleteClick = (point) => {

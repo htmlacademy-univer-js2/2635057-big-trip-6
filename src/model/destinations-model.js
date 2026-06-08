@@ -1,7 +1,10 @@
-import { DESTINATIONS } from '../const.js';
-
 export default class DestinationsModel {
-  #destinations = DESTINATIONS;
+  #pointsApiService = null;
+  #destinations = [];
+
+  constructor({ pointsApiService }) {
+    this.#pointsApiService = pointsApiService;
+  }
 
   getDestinations() {
     return this.#destinations;
@@ -13,5 +16,13 @@ export default class DestinationsModel {
 
   getDestinationByName(name) {
     return this.#destinations.find((destination) => destination.name === name);
+  }
+
+  async init() {
+    try {
+      this.#destinations = await this.#pointsApiService.destinations;
+    } catch (err) {
+      this.#destinations = [];
+    }
   }
 }

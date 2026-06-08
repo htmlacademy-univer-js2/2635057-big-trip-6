@@ -1,8 +1,8 @@
 import { FilterType } from './const.js';
 
-const isPointFuture = (point) => new Date(point.startDate) > new Date();
-const isPointPast = (point) => new Date(point.endDate) < new Date();
-const isPointPresent = (point) => new Date(point.startDate) <= new Date() && new Date(point.endDate) >= new Date();
+const isPointFuture = (point) => new Date(point.dateFrom) > new Date();
+const isPointPast = (point) => new Date(point.dateTo) < new Date();
+const isPointPresent = (point) => new Date(point.dateFrom) <= new Date() && new Date(point.dateTo) >= new Date();
 
 export const filter = {
   [FilterType.EVERYTHING]: (points) => [...points],
@@ -11,13 +11,15 @@ export const filter = {
   [FilterType.PAST]: (points) => points.filter(isPointPast)
 };
 
-export const sortByDay = (pointA, pointB) => new Date(pointA.startDate) - new Date(pointB.startDate);
+export const sortByDay = (pointA, pointB) => new Date(pointA.dateFrom) - new Date(pointB.dateFrom);
 
 export const sortByTime = (pointA, pointB) => {
-  const durationPointA = new Date(pointA.endDate) - new Date(pointA.startDate);
-  const durationPointB = new Date(pointB.endDate) - new Date(pointB.startDate);
+  const durationPointA = new Date(pointA.dateTo) - new Date(pointA.dateFrom);
+  const durationPointB = new Date(pointB.dateTo) - new Date(pointB.dateFrom);
 
   return durationPointB - durationPointA;
 };
 
-export const sortByPrice = (pointA, pointB) => pointB.price - pointA.price;
+export const sortByPrice = (pointA, pointB) => pointB.basePrice - pointA.basePrice;
+
+export const capitalize = (str) => str ? `${str[0].toUpperCase()}${str.slice(1)}` : '';

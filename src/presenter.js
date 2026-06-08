@@ -1,5 +1,6 @@
 import SortView from './view/sort-view.js';
 import NoPointsView from './view/no-points-view.js';
+import LoadingView from './view/loading-view.js';
 import PointsListView from './view/points-list-view.js';
 import PointPresenter from './presenter/point-presenter.js';
 import NewPointPresenter from './presenter/new-point-presenter.js';
@@ -27,10 +28,12 @@ export default class Presenter {
   #pointsListComponent = new PointsListView();
   #sortComponent = null;
   #noPointsComponent = null;
+  #loadingComponent = new LoadingView();
 
   #pointPresenters = new Map();
   #newPointPresenter = null;
   #currentSortType = SortType.DAY;
+  #isLoading = true;
 
   constructor({ pointsModel, destinationsModel, offersModel, filterModel }) {
     this.#pointsModel = pointsModel;
@@ -60,6 +63,7 @@ export default class Presenter {
 
   init() {
     this.#newEventButton.addEventListener('click', this.#handleNewEventButtonClick);
+    this.#newEventButton.disabled = true;
     this.#renderBoard();
   }
 
@@ -100,6 +104,10 @@ export default class Presenter {
     render(this.#noPointsComponent, this.#sortContainer);
   }
 
+  #renderLoading() {
+    render(this.#loadingComponent, this.#sortContainer);
+  }
+
   #renderPoint(point) {
     const pointPresenter = new PointPresenter({
       eventsListContainer: this.#pointsListComponent.element,
@@ -114,6 +122,11 @@ export default class Presenter {
   }
 
   #renderBoard() {
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+
     const points = this.points;
 
     if (points.length === 0) {
@@ -134,6 +147,7 @@ export default class Presenter {
 
     remove(this.#sortComponent);
     remove(this.#noPointsComponent);
+    remove(this.#loadingComponent);
     remove(this.#pointsListComponent);
     this.#sortComponent = null;
     this.#noPointsComponent = null;
@@ -143,10 +157,14 @@ export default class Presenter {
     }
   }
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_POINT:
-        this.#pointsModel.updatePoint(updateType, update);
+        try {
+          await this.#pointsModel.updatePoint(updateType, update);
+        } catch (err) {
+          // Обработка ошибки запроса будет добавлена во второй части задания
+        }
         break;
       case UserAction.ADD_POINT:
         this.#pointsModel.addPoint(updateType, update);
@@ -168,6 +186,12 @@ export default class Presenter {
         break;
       case UpdateType.MAJOR:
         this.#clearBoard({ resetSortType: true });
+        this.#renderBoard();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#newEventButton.disabled = false;
         this.#renderBoard();
         break;
     }

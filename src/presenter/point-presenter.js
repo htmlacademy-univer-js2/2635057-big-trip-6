@@ -14,18 +14,20 @@ export default class PointPresenter {
   #offers = [];
   #onDataChange = null;
   #onModeChange = null;
+  #isBlocked = null;
 
   #point = null;
   #pointComponent = null;
   #editFormComponent = null;
   #mode = Mode.DEFAULT;
 
-  constructor({ eventsListContainer, destinations, offers, onDataChange, onModeChange }) {
+  constructor({ eventsListContainer, destinations, offers, onDataChange, onModeChange, isBlocked }) {
     this.#eventsListContainer = eventsListContainer;
     this.#destinations = destinations;
     this.#offers = offers;
     this.#onDataChange = onDataChange;
     this.#onModeChange = onModeChange;
+    this.#isBlocked = isBlocked;
   }
 
   init(point) {
@@ -114,15 +116,13 @@ export default class PointPresenter {
       return;
     }
 
-    const resetFormState = () => {
-      this.#editFormComponent.updateElement({
-        isDisabled: false,
-        isSaving: false,
-        isDeleting: false
-      });
-    };
+    this.#editFormComponent.updateElement({
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false
+    });
 
-    this.#editFormComponent.shake(resetFormState);
+    this.#editFormComponent.shake();
   }
 
   #replacePointToForm = () => {
@@ -132,6 +132,7 @@ export default class PointPresenter {
   };
 
   #replaceFormToPoint = () => {
+    this.#editFormComponent.reset(this.#point);
     replace(this.#pointComponent, this.#editFormComponent);
     document.removeEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.DEFAULT;
@@ -146,6 +147,9 @@ export default class PointPresenter {
 
   #handleEditClick = (evt) => {
     evt.preventDefault();
+    if (this.#isBlocked()) {
+      return;
+    }
     this.#onModeChange();
     this.#replacePointToForm();
   };

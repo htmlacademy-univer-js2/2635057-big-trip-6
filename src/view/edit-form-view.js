@@ -71,15 +71,13 @@ const createDestinationSectionTemplate = (destination) => {
   </section>`;
 };
 
-const createResetButtonTemplate = (isNewPoint, isDeleting, isDisabled) => {
-  const disabledAttr = isDisabled ? 'disabled' : '';
-
+const createResetButtonTemplate = (isNewPoint, isDeleting) => {
   if (isNewPoint) {
-    return `<button class="event__reset-btn" type="reset" ${disabledAttr}>Cancel</button>`;
+    return '<button class="event__reset-btn" type="reset">Cancel</button>';
   }
 
-  return `<button class="event__reset-btn" type="reset" ${disabledAttr}>${isDeleting ? 'Deleting...' : 'Delete'}</button>
-    <button class="event__rollup-btn" type="button" ${disabledAttr}>
+  return `<button class="event__reset-btn" type="reset">${isDeleting ? 'Deleting...' : 'Delete'}</button>
+    <button class="event__rollup-btn" type="button">
       <span class="visually-hidden">Open event</span>
     </button>`;
 };
@@ -130,7 +128,7 @@ const createEditFormTemplate = ({ point, destinations, offers, isNewPoint }) => 
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit" ${disabledAttr}>${isSaving ? 'Saving...' : 'Save'}</button>
-        ${createResetButtonTemplate(isNewPoint, isDeleting, isDisabled)}
+        ${createResetButtonTemplate(isNewPoint, isDeleting)}
       </header>
 
       <section class="event__details">
@@ -172,6 +170,10 @@ export default class EditFormView extends AbstractStatefulView {
       offers: this.#offers,
       isNewPoint: this.#isNewPoint
     });
+  }
+
+  reset(point) {
+    this.updateElement(EditFormView.parsePointToState(point));
   }
 
   removeElement() {
@@ -287,16 +289,25 @@ export default class EditFormView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
+    if (this._state.isDisabled) {
+      return;
+    }
     this.#onFormSubmit(EditFormView.parseStateToPoint(this._state));
   };
 
   #resetClickHandler = (evt) => {
     evt.preventDefault();
+    if (this._state.isDisabled) {
+      return;
+    }
     this.#onDeleteClick(EditFormView.parseStateToPoint(this._state));
   };
 
   #rollupClickHandler = (evt) => {
     evt.preventDefault();
+    if (this._state.isDisabled) {
+      return;
+    }
     this.#onRollupClick(evt);
   };
 

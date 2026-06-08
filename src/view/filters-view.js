@@ -3,7 +3,7 @@ import { FilterLabel, FilterType } from '../const.js';
 
 const createFilterItemTemplate = ({ type, count }, currentFilterType) => {
   const isChecked = type === currentFilterType;
-  const isDisabled = count === 0 && type !== FilterType.EVERYTHING;
+  const isDisabled = count === 0;
 
   return `<div class="trip-filters__filter">
     <input

@@ -63,13 +63,28 @@ export default class NewPointPresenter {
     this.#onDestroy();
   }
 
+  setSaving() {
+    this.#editFormComponent.updateElement({
+      isDisabled: true,
+      isSaving: true
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#editFormComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    this.#editFormComponent.shake(resetFormState);
+  }
+
   #handleFormSubmit = (point) => {
-    this.#onDataChange(
-      UserAction.ADD_POINT,
-      UpdateType.MAJOR,
-      { ...point, id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() }
-    );
-    this.destroy();
+    // Форма скроется автоматически при перерисовке после успешного ответа сервера
+    this.#onDataChange(UserAction.ADD_POINT, UpdateType.MAJOR, point);
   };
 
   #handleCancelClick = () => {

@@ -1,3 +1,4 @@
+import './styles/shake.css';
 import PointsApiService from './points-api-service.js';
 import PointsModel from './model/points-model.js';
 import DestinationsModel from './model/destinations-model.js';

@@ -65,12 +65,10 @@ export default class TripInfoPresenter {
   }
 
   #getDates(points) {
-    const startDate = dayjs(points[0].dateFrom);
-    const endDate = dayjs(points[points.length - 1].dateTo);
+    const startDate = dayjs(points[0].dateFrom).format('D MMM').toUpperCase();
+    const endDate = dayjs(points[points.length - 1].dateTo).format('D MMM').toUpperCase();
 
-    const startFormat = startDate.month() === endDate.month() ? 'D' : 'D MMM';
-
-    return `${startDate.format(startFormat)}&nbsp;&mdash;&nbsp;${endDate.format('D MMM')}`;
+    return `${startDate}&nbsp;&mdash;&nbsp;${endDate}`;
   }
 
   #getCost(points) {

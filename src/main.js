@@ -43,7 +43,13 @@ tripInfoPresenter.init();
 filterPresenter.init();
 presenter.init();
 
-Promise.all([destinationsModel.init(), offersModel.init()])
-  .finally(() => {
-    pointsModel.init();
-  });
+const bootstrap = async () => {
+  try {
+    await Promise.all([destinationsModel.init(), offersModel.init()]);
+    await pointsModel.init();
+  } catch (err) {
+    pointsModel.setLoadFailed();
+  }
+};
+
+bootstrap();

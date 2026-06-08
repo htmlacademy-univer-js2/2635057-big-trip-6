@@ -1,12 +1,12 @@
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
-import { OFFERS, TYPES } from '../const.js';
+import { TYPES } from '../const.js';
 import { AbstractStatefulView } from '../render.js';
 
 const DATE_FORMAT = 'DD/MM/YY HH:mm';
 
-const formatDateForInput = (date) => dayjs(date).format(DATE_FORMAT);
+const formatDateForInput = (date) => date ? dayjs(date).format(DATE_FORMAT) : '';
 
 const createDestinationOptionsTemplate = (destinations) => destinations
   .map((destination) => `<option value="${destination.name}"></option>`)
@@ -21,8 +21,8 @@ const createEventTypeItemTemplate = (type, currentType, pointId) => {
   </div>`;
 };
 
-const createOffersTemplate = (point) => {
-  const offersByType = OFFERS.find((offerGroup) => offerGroup.type === point.type);
+const createOffersTemplate = (point, offers) => {
+  const offersByType = offers.find((offerGroup) => offerGroup.type === point.type);
   const typeOffers = offersByType ? offersByType.offers : [];
 
   if (typeOffers.length === 0) {
@@ -70,7 +70,14 @@ const createDestinationSectionTemplate = (destination) => {
   </section>`;
 };
 
-const createEditFormTemplate = ({ point, destinations }) => {
+const createResetButtonTemplate = (isNewPoint) => isNewPoint
+  ? '<button class="event__reset-btn" type="reset">Cancel</button>'
+  : `<button class="event__reset-btn" type="reset">Delete</button>
+    <button class="event__rollup-btn" type="button">
+      <span class="visually-hidden">Open event</span>
+    </button>`;
+
+const createEditFormTemplate = ({ point, destinations, offers, isNewPoint }) => {
   const selectedDestination = destinations.find((destination) => destination.name === point.destination);
 
   return `<li class="trip-events__item">
@@ -113,14 +120,11 @@ const createEditFormTemplate = ({ point, destinations }) => {
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
-        <button class="event__rollup-btn" type="button">
-          <span class="visually-hidden">Open event</span>
-        </button>
+        ${createResetButtonTemplate(isNewPoint)}
       </header>
 
       <section class="event__details">
-        ${createOffersTemplate(point)}
+        ${createOffersTemplate(point, offers)}
         ${createDestinationSectionTemplate(selectedDestination)}
       </section>
     </form>
@@ -129,24 +133,49 @@ const createEditFormTemplate = ({ point, destinations }) => {
 
 export default class EditFormView extends AbstractStatefulView {
   #destinations = [];
-  #formSubmitHandler = null;
-  #rollupClickHandler = null;
+  #offers = [];
+  #isNewPoint = false;
+  #onFormSubmit = null;
+  #onRollupClick = null;
+  #onDeleteClick = null;
   #datepickerFrom = null;
   #datepickerTo = null;
 
-  constructor({ point, destinations, onFormSubmit, onRollupClick }) {
+  constructor({ point, destinations, offers, isNewPoint = false, onFormSubmit, onRollupClick, onDeleteClick }) {
     super();
     this._state = EditFormView.parsePointToState(point);
     this.#destinations = destinations;
-    this.#formSubmitHandler = onFormSubmit;
-    this.#rollupClickHandler = onRollupClick;
+    this.#offers = offers;
+    this.#isNewPoint = isNewPoint;
+    this.#onFormSubmit = onFormSubmit;
+    this.#onRollupClick = onRollupClick;
+    this.#onDeleteClick = onDeleteClick;
 
     this._setInnerHandlers();
     this.#setDatepickers();
   }
 
   get template() {
-    return createEditFormTemplate({ point: this._state, destinations: this.#destinations });
+    return createEditFormTemplate({
+      point: this._state,
+      destinations: this.#destinations,
+      offers: this.#offers,
+      isNewPoint: this.#isNewPoint
+    });
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepickerFrom) {
+      this.#datepickerFrom.destroy();
+      this.#datepickerFrom = null;
+    }
+
+    if (this.#datepickerTo) {
+      this.#datepickerTo.destroy();
+      this.#datepickerTo = null;
+    }
   }
 
   _restoreHandlers() {
@@ -156,9 +185,14 @@ export default class EditFormView extends AbstractStatefulView {
 
   _setInnerHandlers() {
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupClickHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#resetClickHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('input', this.#priceInputHandler);
+
+    if (!this.#isNewPoint) {
+      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupClickHandler);
+    }
   }
 
   #setDatepickers() {
@@ -199,7 +233,8 @@ export default class EditFormView extends AbstractStatefulView {
 
   #typeChangeHandler = (evt) => {
     this.updateElement({
-      type: evt.target.value
+      type: evt.target.value,
+      offers: []
     });
   };
 
@@ -207,6 +242,7 @@ export default class EditFormView extends AbstractStatefulView {
     const nextDestination = this.#destinations.find((destination) => destination.name === evt.target.value);
 
     if (!nextDestination) {
+      evt.target.value = this._state.destination;
       return;
     }
 
@@ -216,7 +252,31 @@ export default class EditFormView extends AbstractStatefulView {
     });
   };
 
+  #priceInputHandler = (evt) => {
+    evt.target.value = evt.target.value.replace(/\D/g, '');
+    this._setState({ price: Number(evt.target.value) });
+  };
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#onFormSubmit(EditFormView.parseStateToPoint(this._state));
+  };
+
+  #resetClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#onDeleteClick(EditFormView.parseStateToPoint(this._state));
+  };
+
+  #rollupClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#onRollupClick(evt);
+  };
+
   static parsePointToState(point) {
     return { ...point };
+  }
+
+  static parseStateToPoint(state) {
+    return { ...state };
   }
 }

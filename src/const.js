@@ -1,68 +1,53 @@
 export const TYPES = [
-  'Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'
+  'taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'
 ];
 
-export const DESTINATIONS = [
-  {
-    id: '1',
-    name: 'Amsterdam',
-    description: 'Amsterdam is the capital of the Netherlands, known for its artistic heritage, elaborate canal system and narrow houses.',
-    pictures: [
-      { src: 'https://loremflickr.com/248/152?random=1', description: 'Amsterdam canal' },
-      { src: 'https://loremflickr.com/248/152?random=2', description: 'Amsterdam street' }
-    ]
-  },
-  {
-    id: '2',
-    name: 'Geneva',
-    description: 'Geneva is a city in Switzerland that lies at the southern tip of expansive Lac Léman (Lake Geneva).',
-    pictures: [
-      { src: 'https://loremflickr.com/248/152?random=3', description: 'Lake Geneva' },
-      { src: 'https://loremflickr.com/248/152?random=4', description: 'Geneva fountain' }
-    ]
-  },
-  {
-    id: '3',
-    name: 'Chamonix',
-    description: 'Chamonix-Mont-Blanc is a resort area near the junction of France, Switzerland and Italy.',
-    pictures: [
-      { src: 'https://loremflickr.com/248/152?random=5', description: 'Mont Blanc' }
-    ]
-  }
-];
+export const FilterType = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past'
+};
 
-export const OFFERS = [
-  {
-    id: '1',
-    type: 'Flight',
-    offers: [
-      { id: '1', title: 'Add luggage', price: 50 },
-      { id: '2', title: 'Switch to comfort', price: 80 },
-      { id: '3', title: 'Add meal', price: 15 },
-      { id: '4', title: 'Choose seats', price: 5 }
-    ]
-  },
-  {
-    id: '2',
-    type: 'Taxi',
-    offers: [
-      { id: '5', title: 'Order Uber', price: 20 },
-      { id: '6', title: 'Rent a car', price: 200 }
-    ]
-  },
-  {
-    id: '3',
-    type: 'Bus',
-    offers: [
-      { id: '7', title: 'Travel by bus', price: 40 }
-    ]
-  },
-  {
-    id: '4',
-    type: 'Check-in',
-    offers: [
-      { id: '8', title: 'Add breakfast', price: 50 },
-      { id: '9', title: 'Add parking', price: 30 }
-    ]
-  }
-];
+export const SortType = {
+  DAY: 'day',
+  EVENT: 'event',
+  TIME: 'time',
+  PRICE: 'price',
+  OFFERS: 'offers'
+};
+
+export const UserAction = {
+  UPDATE_POINT: 'UPDATE_POINT',
+  ADD_POINT: 'ADD_POINT',
+  DELETE_POINT: 'DELETE_POINT'
+};
+
+export const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+  INIT: 'INIT'
+};
+
+export const EmptyListMessage = {
+  [FilterType.EVERYTHING]: 'Click New Event to create your first point',
+  [FilterType.FUTURE]: 'There are no future events now',
+  [FilterType.PRESENT]: 'There are no present events now',
+  [FilterType.PAST]: 'There are no past events now'
+};
+
+export const FilterLabel = {
+  [FilterType.EVERYTHING]: 'Everything',
+  [FilterType.FUTURE]: 'Future',
+  [FilterType.PRESENT]: 'Present',
+  [FilterType.PAST]: 'Past'
+};
+
+export const Message = {
+  LOADING: 'Loading...',
+  FAILED: 'Failed to load latest route information'
+};
+
+export const AUTHORIZATION = 'Basic nana9bigTr1pK3y2026';
+export const END_POINT = 'https://21.objects.pages.academy/big-trip';

@@ -66,4 +66,13 @@ function replace(newComponent, oldComponent) {
   oldComponent.element.replaceWith(newComponent.element);
 }
 
-export { RenderPosition, AbstractView, AbstractStatefulView, render, replace };
+function remove(component) {
+  if (component === null) {
+    return;
+  }
+
+  component.element.remove();
+  component.removeElement();
+}
+
+export { RenderPosition, AbstractView, AbstractStatefulView, render, replace, remove };

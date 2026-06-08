@@ -39,6 +39,11 @@ module.exports = {
           },
         },
       },
+      // ДОБАВЬТЕ ЭТО ПРАВИЛО ДЛЯ CSS
+      {
+        test: /\.css$/i,  // i - означает case-insensitive (не зависит от регистра)
+        use: ['style-loader', 'css-loader'],
+      },
     ],
   },
 };

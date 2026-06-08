@@ -6,8 +6,10 @@ import OffersModel from './model/offers-model.js';
 import FilterModel from './model/filter-model.js';
 import Presenter from './presenter.js';
 import FilterPresenter from './presenter/filter-presenter.js';
+import TripInfoPresenter from './presenter/trip-info-presenter.js';
 import { AUTHORIZATION, END_POINT } from './const.js';
 
+const tripMainContainer = document.querySelector('.trip-main');
 const filterContainer = document.querySelector('.trip-controls__filters');
 
 const pointsApiService = new PointsApiService(END_POINT, AUTHORIZATION);
@@ -30,6 +32,14 @@ const filterPresenter = new FilterPresenter({
   pointsModel
 });
 
+const tripInfoPresenter = new TripInfoPresenter({
+  infoContainer: tripMainContainer,
+  pointsModel,
+  destinationsModel,
+  offersModel
+});
+
+tripInfoPresenter.init();
 filterPresenter.init();
 presenter.init();
 

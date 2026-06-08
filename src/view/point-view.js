@@ -1,9 +1,13 @@
 import dayjs from 'dayjs';
 import dayjsDuration from 'dayjs/plugin/duration';
+import he from 'he';
 import { AbstractView } from '../render.js';
 import { capitalize } from '../utils.js';
 
 dayjs.extend(dayjsDuration);
+
+const MINUTES_IN_HOUR = 60;
+const MINUTES_IN_DAY = 1440;
 
 const formatDate = (dateString) => dayjs(dateString).format('MMM D').toUpperCase();
 
@@ -13,11 +17,11 @@ const formatDuration = (dateFrom, dateTo) => {
   const diffInMinutes = dayjs(dateTo).diff(dayjs(dateFrom), 'minute');
   const pointDuration = dayjs.duration(diffInMinutes, 'minute');
 
-  if (diffInMinutes < 60) {
+  if (diffInMinutes < MINUTES_IN_HOUR) {
     return `${diffInMinutes}M`;
   }
 
-  if (diffInMinutes < 1440) {
+  if (diffInMinutes < MINUTES_IN_DAY) {
     return `${String(pointDuration.hours()).padStart(2, '0')}H ${String(pointDuration.minutes()).padStart(2, '0')}M`;
   }
 
@@ -39,7 +43,7 @@ const createPointTemplate = (point, destination, offers) => {
     ? `<h4 class="visually-hidden">Offers:</h4>
        <ul class="event__selected-offers">
          ${offers.map((offer) => `<li class="event__offer">
-           <span class="event__offer-title">${offer.title}</span>
+           <span class="event__offer-title">${he.encode(offer.title)}</span>
            +€&nbsp;<span class="event__offer-price">${offer.price}</span>
          </li>`).join('')}
        </ul>`
@@ -52,7 +56,7 @@ const createPointTemplate = (point, destination, offers) => {
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${capitalize(type)} ${destinationName}</h3>
+        <h3 class="event__title">${capitalize(type)} ${he.encode(destinationName)}</h3>
         <div class="event__schedule">
           <p class="event__time">
             <time class="event__start-time" datetime="${dateFrom}">${startTime}</time>

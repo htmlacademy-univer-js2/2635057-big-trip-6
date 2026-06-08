@@ -7,11 +7,10 @@ const createBlankPoint = () => {
 
   return {
     type: TYPES[0],
-    destination: '',
-    destinationId: null,
-    startDate: now,
-    endDate: now,
-    price: 0,
+    destination: null,
+    dateFrom: now,
+    dateTo: now,
+    basePrice: 0,
     offers: [],
     isFavorite: false
   };

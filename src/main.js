@@ -1,15 +1,19 @@
+import PointsApiService from './points-api-service.js';
 import PointsModel from './model/points-model.js';
 import DestinationsModel from './model/destinations-model.js';
 import OffersModel from './model/offers-model.js';
 import FilterModel from './model/filter-model.js';
 import Presenter from './presenter.js';
 import FilterPresenter from './presenter/filter-presenter.js';
+import { AUTHORIZATION, END_POINT } from './const.js';
 
 const filterContainer = document.querySelector('.trip-controls__filters');
 
-const pointsModel = new PointsModel();
-const destinationsModel = new DestinationsModel();
-const offersModel = new OffersModel();
+const pointsApiService = new PointsApiService(END_POINT, AUTHORIZATION);
+
+const pointsModel = new PointsModel({ pointsApiService });
+const destinationsModel = new DestinationsModel({ pointsApiService });
+const offersModel = new OffersModel({ pointsApiService });
 const filterModel = new FilterModel();
 
 const presenter = new Presenter({
@@ -27,3 +31,8 @@ const filterPresenter = new FilterPresenter({
 
 filterPresenter.init();
 presenter.init();
+
+Promise.all([destinationsModel.init(), offersModel.init()])
+  .finally(() => {
+    pointsModel.init();
+  });

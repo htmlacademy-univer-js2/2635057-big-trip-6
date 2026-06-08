@@ -1,7 +1,10 @@
-import { OFFERS } from '../const.js';
-
 export default class OffersModel {
-  #offers = OFFERS;
+  #pointsApiService = null;
+  #offers = [];
+
+  constructor({ pointsApiService }) {
+    this.#pointsApiService = pointsApiService;
+  }
 
   getOffers() {
     return this.#offers;
@@ -10,5 +13,13 @@ export default class OffersModel {
   getOffersByType(type) {
     const offersByType = this.#offers.find((offerGroup) => offerGroup.type === type);
     return offersByType ? offersByType.offers : [];
+  }
+
+  async init() {
+    try {
+      this.#offers = await this.#pointsApiService.offers;
+    } catch (err) {
+      this.#offers = [];
+    }
   }
 }
